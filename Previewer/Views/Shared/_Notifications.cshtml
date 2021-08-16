@@ -1,0 +1,16 @@
+﻿@using Previewer
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+@if (TempData["Success"] != null)
+{
+    <script type="text/javascript">
+        toastr.success('@TempData["Success"]')
+    </script>
+}
+@if (TempData["Error"] != null)
+{
+    <script type="text/javascript">
+        toastr.success('@TempData["Error"]')
+    </script>
+}

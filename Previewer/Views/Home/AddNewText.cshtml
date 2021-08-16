@@ -1,0 +1,141 @@
+﻿@using System.Linq
+@using Previewer.HtmlConvertor
+@model HtmlManagerVM
+
+
+<link href="~/Content/Scripts/ckeditor/contents.css" rel="stylesheet" />
+@using (Html.BeginForm())
+{
+<form id="">
+    <input asp-for="@Model.Id" type="hidden" />
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <h3 class="alert">
+                        <label> Write your text here:</label>
+                    </h3>
+                   
+                </div>
+                <br />
+            </div>
+            <div class="col-md-10">
+                <div class="form-group">
+                    <textarea id="ckeditor" class="ckeditor" name="TextHtml"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+
+                </div>
+            </div>
+            <div class="col-md-10">
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-block btn-danger" />
+                </div>
+                <div class="form-group">
+                    <button type="button" id="RunBtn" class="btn btn-block btn-danger">Run</button>
+                </div>
+                <div class="col-6 text-right">
+                    <button id="CheckOriginal" type="button" class="btn btn-block btn-danger">
+                        Check Original
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+</form>
+
+    @if (Model.Id != default)
+    {
+        <div>
+            <h3>Link</h3>
+            <button onclick="copyToClipboard('Link')" class="btn btn-sm header-btn">
+                <span>Copy</span>
+            </button>
+            <a asp-controller="Home" asp-action="AddNewTextGet" asp-route-id="@Model.Id">Real Link</a>
+            <input id="Link" asp-controller="Home" asp-action="AddNewTextGet" asp-route-id="@Model.Id" class="d-none" value="@Context.Request.Host/Home/Action/@Model.Id" />
+        </div>
+    }
+
+    <div id="TextContext">@Html.Raw(Model.TextHtml)</div>
+}
+
+@section Scripts {
+    <script src="~/Content/Scripts/ckeditor/ckeditor_source.js"></script>
+    <script src="~/Content/Scripts/ckeditor/ckeditor_basic_source.js"></script>
+    <script src="~/Content/Scripts/ckeditor/ckeditor.js"></script>
+    <script>
+        //$(document).ready(function () {
+        //    CKEDITOR.on('key', function (evt) {
+        //        // getData() returns CKEditor's HTML content.
+        //        console.log('Total bytes: ' + evt.editor.getData().length);
+        //    });
+        //})
+
+
+        $('#RunBtn').click(function () {
+            var $iframeBody = $('iframe').contents().find('body');
+            $('#TextContext').html($iframeBody.html());
+        });
+
+        $('#CheckOriginal').on('click', function () {
+            $.post({
+                data: {
+                    textHtml: $('iframe').contents().find('body').html()
+                },
+                url: '/Home/CheckOriginal',
+                success: function (data) {
+                    toastr.success(data);
+                },
+                error: function (data) {
+                    toastr["error"](data.responseText);
+                },
+            })
+        })
+
+        function copyToClipboard(id) {
+            var input = $('#' + id)
+            var success = true,
+                range = document.createRange(),
+                selection;
+
+            // For IE.
+            if (window.clipboardData) {
+                window.clipboardData.setData("Text", input.val());
+            } else {
+                // Create a temporary element off screen.
+                var tmpElem = $('<div>');
+                tmpElem.css({
+                    position: "absolute",
+                    left: "-1000px",
+                    top: "-1000px",
+                });
+                // Add the input value to the temp element.
+                tmpElem.text(input.val());
+                $("body").append(tmpElem);
+                // Select temp element.
+                range.selectNodeContents(tmpElem.get(0));
+                selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                // Lets copy.
+                try {
+                    success = document.execCommand("copy", false, null);
+                }
+                catch (e) {
+                    alert('Unsuccessfully copied', input.val(), 'error', null, false);
+                }
+
+                if (success) {
+                    alert("Successfully copied", input.val(), 'success', null, false);
+                    tmpElem.remove();
+                }
+            }
+        }
+    </script>
+}
