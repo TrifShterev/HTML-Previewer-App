@@ -11,9 +11,14 @@ namespace Previewer.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly HtmlPreviewerContext _db = new HtmlPreviewerContext();
+        private readonly HtmlPreviewerContext _db;
 
-        
+        public HomeController(HtmlPreviewerContext dbContext)
+        {
+            this._db = dbContext;
+        }
+
+
         public IActionResult AddNewText() => View(new HtmlManagerVM());
 
       
@@ -81,7 +86,7 @@ namespace Previewer.Controllers
                 return BadRequest();
             }
 
-            var entityHtmlManager = _db.HtmlManagers.FirstOrDefault(x => x.TextHtml == htmlManager.TextHtml);
+            var entityHtmlManager = _db.HtmlManagers.FirstOrDefault(x =>  x.TextHtml == htmlManager.TextHtml);
 
             if (entityHtmlManager != null)
             {
